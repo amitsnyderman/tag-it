@@ -91,17 +91,10 @@
 		});
 
 		tag_input.autocomplete({
-			source: function(search, show_choices){
-			  var filter = new RegExp(search.term, "i");
-				var choices = options.availableTags.filter(function(element) {
-					return (element.search(filter) != -1);
-				});
-
-				show_choices(subtract_array(choices,assigned_tags()));
-			},
+			source: options.availableTags,
 			select: function(event,ui){
-				if (is_new (ui.item.value)) {
-					create_choice (ui.item.value);
+				if (is_new (ui.item.name)) {
+					create_choice (ui.item.name, ui.item.value);
 				}
 				// Cleaning the input.
 				tag_input.val("");
@@ -139,10 +132,10 @@
 			});
 			return is_new;
 		}
-		function create_choice (value){
+		function create_choice (value, label){
 			var el = "";
 			el  = "<li class=\"tagit-choice\">\n";
-			el += value + "\n";
+			el += label || value + "\n";
 			el += "<a class=\"close\">x</a>\n";
 			el += "<input type=\"hidden\" style=\"display:none;\" value=\""+value+"\" name=\"" + options.itemName + "[" + options.fieldName + "][]\">\n";
 			el += "</li>\n";
@@ -150,6 +143,21 @@
 			$(el).insertBefore (li_search_tags);
 			tag_input.val("");
 		}
+		
+		this.add = function(value, label) {
+			create_choice(value, label);
+			return this;
+		};
+		this.remove = function(value) {
+			tag_input.parents("ul").children(".tagit-choice").each(function(i){
+				n = $(this).children("input").val();
+				if (value == n)
+					$(this).children('a').click();
+			});
+			return this;
+		};
+		
+		return this;
 	};
 
 	String.prototype.trim = function() {
